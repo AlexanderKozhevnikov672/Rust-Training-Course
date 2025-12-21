@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::tasks::c9_smart_pointers::{BinaryTreeNode, Package, SharedCounter};
+use crate::tasks::c9_smart_pointers::{BinaryTreeNode, SharedCounter};
 
 #[test]
 fn test_btn_sum() {

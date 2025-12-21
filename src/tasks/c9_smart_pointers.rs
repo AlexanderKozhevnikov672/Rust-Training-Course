@@ -21,6 +21,39 @@ use std::rc::Rc;
 // Use `Box` if needed
 
 // IMPLEMENT HERE:
+pub struct BinaryTreeNode {
+    value: i32,
+    left_child: Option<Box<BinaryTreeNode>>,
+    right_child: Option<Box<BinaryTreeNode>>,
+}
+
+impl BinaryTreeNode {
+    pub fn new(value: i32) -> BinaryTreeNode {
+        BinaryTreeNode {
+            value,
+            left_child: None,
+            right_child: None,
+        }
+    }
+
+    pub fn with_children(
+        value: i32,
+        left_child: BinaryTreeNode,
+        right_child: BinaryTreeNode,
+    ) -> BinaryTreeNode {
+        BinaryTreeNode {
+            value,
+            left_child: Some(Box::new(left_child)),
+            right_child: Some(Box::new(right_child)),
+        }
+    }
+
+    pub fn sum(&self) -> i32 {
+        self.value
+            + self.left_child.as_ref().map_or(0, |node| node.sum())
+            + self.right_child.as_ref().map_or(0, |node| node.sum())
+    }
+}
 
 // Rc
 // ================================================================================================
@@ -42,10 +75,57 @@ use std::rc::Rc;
 // Use `Rc` in the `Package` struct where needed to avoid deep clone.
 
 // IMPLEMENT HERE:
+pub struct Package {
+    name: String,
+    pub dependencies: Vec<Rc<Package>>,
+}
+
+impl Package {
+    pub fn new(name: &str) -> Package {
+        Package {
+            name: name.to_string(),
+            dependencies: Vec::new(),
+        }
+    }
+
+    pub fn with_dependencies(name: &str, dependencies: Vec<Rc<Package>>) -> Package {
+        Package { name: name.to_string(), dependencies }
+    }
+
+    pub fn list_dependencies(&self) -> Vec<String> {
+        let mut dependencies = Vec::new();
+        self.collect_dependencies(&mut dependencies);
+        dependencies
+    }
+
+    fn collect_dependencies(&self, dependencies: &mut Vec<String>) {
+        dependencies.push(self.name.clone());
+
+        for dep in &self.dependencies {
+            dep.collect_dependencies(dependencies);
+        }
+    }
+}
 
 #[test]
 fn test_list_dependencies() {
-    // IMPLEMENT HERE:
+    let package1 = Rc::new(Package::new("package1"));
+    let package2 = Rc::new(Package::new("package2"));
+    let package3 = Rc::new(Package::new("package3"));
+    let package4 =
+        Rc::new(Package::with_dependencies("package4", vec![package1.clone(), package2.clone()]));
+    let package5 =
+        Rc::new(Package::with_dependencies("package5", vec![package3.clone(), package4.clone()]));
+
+    let mut dependencies = package5.list_dependencies();
+    dependencies.sort();
+
+    let mut expected = Vec::new();
+    for i in 1..6 {
+        expected.push(format!("package{i}").to_string());
+    }
+
+    assert_eq!(dependencies, expected);
 }
 
 // RefCell
@@ -60,19 +140,19 @@ fn test_list_dependencies() {
 
 // IMPLEMENT HERE:
 pub struct SharedCounter {
-    value: i32,
+    value: RefCell<i32>,
 }
 
 impl SharedCounter {
     pub fn new() -> Self {
-        !unimplemented!()
+        SharedCounter { value: RefCell::new(0) }
     }
 
     pub fn increment(&self) {
-        !unimplemented!()
+        *self.value.borrow_mut() += 1;
     }
 
     pub fn get(&self) -> i32 {
-        !unimplemented!()
+        *self.value.borrow()
     }
 }
