@@ -14,7 +14,14 @@ use std::collections::HashMap;
 // If some words have the same frequency, return them in alphabetical order.
 
 pub fn word_frequencies(text: &str) -> Vec<(String, usize)> {
-    !unimplemented!()
+    let mut word_count = HashMap::new();
+    text.split_whitespace()
+        .for_each(|word| *word_count.entry(word.to_lowercase()).or_insert(0) += 1);
+
+    let mut data: Vec<(String, usize)> = word_count.into_iter().collect();
+    data.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+
+    data
 }
 
 // ----- 2 --------------------------------------
@@ -26,7 +33,17 @@ pub fn word_frequencies(text: &str) -> Vec<(String, usize)> {
 // If some letters have the same frequency, return them in alphabetical order.
 
 pub fn top_k_most_common_letters(text: &str, k: usize) -> Vec<(char, usize)> {
-    !unimplemented!()
+    let mut char_count = HashMap::new();
+    text.chars().for_each(|c| {
+        if c.is_alphabetic() {
+            *char_count.entry(c.to_ascii_lowercase()).or_insert(0) += 1
+        }
+    });
+
+    let mut data: Vec<(char, usize)> = char_count.into_iter().collect();
+    data.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+
+    data.into_iter().take(k).collect()
 }
 
 // CLOSURES
@@ -41,7 +58,10 @@ pub fn top_k_most_common_letters(text: &str, k: usize) -> Vec<(char, usize)> {
 // You must use closures in filtering and sorting.
 
 pub fn filter_and_sort_names(names: Vec<String>, minimum_length: usize) -> Vec<String> {
-    !unimplemented!()
+    let mut filtered_names: Vec<String> =
+        names.into_iter().filter(|name| name.len() >= minimum_length).collect();
+    filtered_names.sort_by_key(|name| name.to_lowercase());
+    filtered_names
 }
 
 // ----- 4 --------------------------------------
@@ -52,5 +72,18 @@ pub fn filter_and_sort_names(names: Vec<String>, minimum_length: usize) -> Vec<S
 // - Returns the grouped map, sorted internally by student names.
 
 pub fn group_students_by_grade(students: Vec<(String, u32)>) -> HashMap<u32, Vec<String>> {
-    !unimplemented!()
+    let mut groups: HashMap<u32, Vec<String>> = HashMap::new();
+
+    students.into_iter().for_each(|(name, grade)| {
+        groups
+            .entry(grade)
+            .and_modify(|names| names.push(name.clone()))
+            .or_insert_with(|| vec![name.clone()]);
+    });
+
+    groups
+        .values_mut()
+        .for_each(|names| names.sort_by_key(|name| name.to_lowercase()));
+
+    groups
 }
