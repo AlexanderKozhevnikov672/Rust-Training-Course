@@ -5,7 +5,7 @@
 
 // ----- 1 --------------------------------------
 // Design a small simulation of a zoo where you have different animal types that can make noise and
-// move. You have to use dynamic dispatch (trait objects) so that a collection can hold a mix of 
+// move. You have to use dynamic dispatch (trait objects) so that a collection can hold a mix of
 // different types of animals and call methods uniformly.
 //
 // - Define a trait `Animal` with the following methods:
@@ -17,57 +17,165 @@
 //   has its own name, own noise (e.g., "Roar!", "Oi mate! Bloody hell I love fish'n'chips brof!'"),
 //   and keeps track of its position `(x, y)` as `f64`.
 //
-// Create a struct `Zoo` that holds a vector of animals. Provide the following methods for this 
+// Create a struct `Zoo` that holds a vector of animals. Provide the following methods for this
 // struct:
 // - `fn new -> Self`: just a basic constructor.
 // - `add_animal`: adds a new animal to the zoo.
-// - `make_all_noises -> Vec<String>`: calls `make_noise()` on each animal and collects the 
-//   strings.
+// - `make_all_noises -> Vec<String>`: calls `make_noise()` on each animal and collects the strings.
 // - `move_all`: moves every animal by the given delta.
 // - `positions -> Vec<(&str, (f64, f64))>`: returns a vector of tuples with each animal’s name and
 //   its current position.
 //
-// White a small example function which creates a zoo, adds your animals there and calls the 
+// White a small example function which creates a zoo, adds your animals there and calls the
 // `make_all_noises`, `move_all` and `positions` Zoo methods to show that they're working correctly.
 
-trait Animal {
+use std::fmt;
+
+pub trait Animal {
     fn name(&self) -> &str;
     fn make_noise(&self) -> String;
     fn move_position(&mut self, delta_x: f64, delta_y: f64);
     fn position(&self) -> (f64, f64);
 }
 
-struct Zoo {
-    // impl here:
+pub struct Lion {
+    name: String,
+    x: f64,
+    y: f64,
+}
+
+impl Lion {
+    pub fn new(name: &str, x: f64, y: f64) -> Self {
+        Lion { name: name.to_string(), x, y }
+    }
+}
+
+impl Animal for Lion {
+    fn name(&self) -> &str {
+        self.name.as_str()
+    }
+
+    fn make_noise(&self) -> String {
+        "Roar!".to_string()
+    }
+
+    fn move_position(&mut self, delta_x: f64, delta_y: f64) {
+        self.x += delta_x;
+        self.y += delta_y;
+    }
+
+    fn position(&self) -> (f64, f64) {
+        (self.x, self.y)
+    }
+}
+
+pub struct BritishPigeon {
+    name: String,
+    x: f64,
+    y: f64,
+}
+
+impl BritishPigeon {
+    pub fn new(name: &str, x: f64, y: f64) -> Self {
+        BritishPigeon { name: name.to_string(), x, y }
+    }
+}
+
+impl Animal for BritishPigeon {
+    fn name(&self) -> &str {
+        self.name.as_str()
+    }
+
+    fn make_noise(&self) -> String {
+        "Oi mate! Bloody hell I love fish'n'chips brof!".to_string()
+    }
+
+    fn move_position(&mut self, delta_x: f64, delta_y: f64) {
+        self.x += delta_x;
+        self.y += delta_y;
+    }
+
+    fn position(&self) -> (f64, f64) {
+        (self.x, self.y)
+    }
+}
+
+pub struct Zoo {
+    animals: Vec<Box<dyn Animal>>,
 }
 
 impl Zoo {
-    // impl here:
+    pub fn new() -> Zoo {
+        Zoo { animals: Vec::new() }
+    }
+
+    pub fn add_animal(&mut self, animal: Box<dyn Animal>) {
+        self.animals.push(animal);
+    }
+
+    pub fn make_all_noises(&self) -> Vec<String> {
+        self.animals.iter().map(|animal| animal.make_noise()).collect()
+    }
+
+    pub fn move_all(&mut self, delta_x: f64, delta_y: f64) {
+        self.animals
+            .iter_mut()
+            .for_each(|animal| animal.move_position(delta_x, delta_y));
+    }
+
+    pub fn positions(&self) -> Vec<(&str, (f64, f64))> {
+        self.animals.iter().map(|animal| (animal.name(), animal.position())).collect()
+    }
 }
 
 // SUPERTRAITS
 // ================================================================================================
 
 // ----- 2 --------------------------------------
-// Implement the `BackTo2007` trait with the `std::fmt::Display` as a supertrait for it. Implement 
-// `BackTo2007` trait for the `Account` struct which consists of `name: String` and 
+// Implement the `BackTo2007` trait with the `std::fmt::Display` as a supertrait for it. Implement
+// `BackTo2007` trait for the `Account` struct which consists of `name: String` and
 // `year_of_birth: u32` fields.
 //
 // This `BackTo2007` trait should have just one `cringify(&self) -> String` method, which will
-// make the account much more cringy by adding "★彡Xx_" to the left of the `self.to_string()` and 
+// make the account much more cringy by adding "★彡Xx_" to the left of the `self.to_string()` and
 // "_xX彡★" to the right. Just like that: ★彡Xx_NAGIBATOR1999_xX彡★
 //
 // Notice that you also should decide how to display the account.
 
 // IMPLEMENT HERE:
+pub struct Account {
+    name: String,
+    year_of_birth: u32,
+}
 
+impl Account {
+    pub fn new(name: &str, year_of_birth: u32) -> Account {
+        Account { name: name.to_string(), year_of_birth }
+    }
+}
+
+impl fmt::Display for Account {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}{}", self.name, self.year_of_birth)
+    }
+}
+
+pub trait BackTo2007: fmt::Display {
+    fn cringify(&self) -> String;
+}
+
+impl BackTo2007 for Account {
+    fn cringify(&self) -> String {
+        format!("★彡Xx_{self}_xX彡★")
+    }
+}
 
 // DEFAULT GENERIC TYPE PARAMETERS AND ASSOCIATED TYPES
 // ================================================================================================
 
 // ----- 3 --------------------------------------
-// Implement a `Converter` trait with `Input` and `Output` associated types. `Input` should have a 
-// `String` default type. This trait should have a `convert` method which takes a value of type 
+// Implement a `Converter` trait with `Input` and `Output` associated types. `Input` should have a
+// `String` default type. This trait should have a `convert` method which takes a value of type
 // `Input` and returns a value of type `Output`.
 //
 // Implement `Converter` for two stucts:
@@ -76,5 +184,31 @@ impl Zoo {
 //   representation.
 
 // IMPLEMENT HERE:
+pub trait Converter {
+    type Input; // Error during declaring deafult type
+    type Output;
 
+    fn convert(&self, input: Self::Input) -> Self::Output;
+}
 
+pub struct StringToIntConverter;
+
+impl Converter for StringToIntConverter {
+    type Input = String;
+    type Output = i32;
+
+    fn convert(&self, input: Self::Input) -> Self::Output {
+        input.parse::<i32>().unwrap_or(0)
+    }
+}
+
+pub struct IntToHexConverter;
+
+impl Converter for IntToHexConverter {
+    type Input = i32;
+    type Output = String;
+
+    fn convert(&self, input: Self::Input) -> Self::Output {
+        format!("{input:x}")
+    }
+}
