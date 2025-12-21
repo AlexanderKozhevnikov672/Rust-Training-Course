@@ -11,7 +11,16 @@
 // You can implement the function and use it right inside the `string_ownership` function.
 #[allow(dead_code)]
 pub fn string_ownership() {
-    !unimplemented!()
+    let s1 = "Hello, ".to_string();
+    let s2 = "World!".to_string();
+    let s3 = longest_owned(s1, s2);
+
+    println!("{s3}");
+    // println!("{s1} {s2}");
+}
+
+pub fn longest_owned(s1: String, s2: String) -> String {
+    if s1.len() < s2.len() { s2 } else { s1 }
 }
 
 // BORROWING
@@ -25,7 +34,13 @@ pub fn string_ownership() {
 // You can implement the function and use it right inside the `simple_borrowing` function.
 #[allow(dead_code)]
 pub fn simple_borrowing() {
-    !unimplemented!()
+    let s = "Hello, World!".to_string();
+    print_length(&s);
+    println!("{s}");
+}
+
+pub fn print_length(s: &str) {
+    println!("{}", s.len());
 }
 
 // ----- 3 --------------------------------------
@@ -36,7 +51,16 @@ pub fn simple_borrowing() {
 // You can implement the function and use it right inside the `hard_borrowing` function.
 #[allow(dead_code)]
 pub fn hard_borrowing() {
-    !unimplemented!()
+    let mut s1 = "Hello, ".to_string();
+    let s2 = "World!".to_string();
+
+    println!("{}", append_and_return_length(&mut s1, &s2));
+    println!("{s1} {s2}")
+}
+
+pub fn append_and_return_length(s: &mut String, suffix: &str) -> usize {
+    s.push_str(suffix);
+    s.len()
 }
 
 // SLICES
@@ -46,12 +70,12 @@ pub fn hard_borrowing() {
 // Write a function last_word(s: &str) -> &str that returns the last word from a string slice.
 // Assume words are separated by spaces.
 pub fn last_word(slice: &str) -> &str {
-    !unimplemented!()
+    slice.split_whitespace().last().unwrap_or_default()
 }
 
 // ----- 5 --------------------------------------
 // Write a function longest_word(sentence: &str) -> &str that returns the longest word in a
 // sentence (string slice). If several words have the same maximum length, return the last one.
 pub fn longest_word(sentence: &str) -> &str {
-    !unimplemented!()
+    sentence.split_whitespace().max_by_key(|s| s.len()).unwrap_or_default()
 }
